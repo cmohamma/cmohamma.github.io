@@ -580,6 +580,7 @@ formattable(SummaryTable, list(
 </tbody>
 </table>
 
+
 # Graph elections
 
 Now that I have the data scraped, cleaned, and combined, I can easily create an interactive map displaying not only both elections data but also the socioeconomic data I scraped earlier as well.
