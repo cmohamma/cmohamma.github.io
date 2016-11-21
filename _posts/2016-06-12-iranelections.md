@@ -580,6 +580,7 @@ formattable(SummaryTable, list(
 </tbody>
 </table>
 
+_________________________________________________
 
 # Graph elections
 
