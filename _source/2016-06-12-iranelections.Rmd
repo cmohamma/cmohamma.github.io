@@ -6,9 +6,9 @@ published:  true
 author: "Cyrus Mohammadian"
 categories: [R]
 output:
+  md_document:
   html_document:
     fig_caption: yes
-    keep_md: yes
     mathjax: default
 ---
 
