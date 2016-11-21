@@ -582,7 +582,7 @@ formattable(SummaryTable, list(
 
 _________________________________________________
 
-# Graph elections
+## Graph elections
 
 Now that I have the data scraped, cleaned, and combined, I can easily create an interactive map displaying not only both elections data but also the socioeconomic data I scraped earlier as well.
 
@@ -771,7 +771,7 @@ ggplot(data=plot.df, aes(x=Province, y=f.diff))+
 
 <img src="/cmohamma.github.io/figure/source/2016-06-12-iranelections/unnamed-chunk-5-1.png" title="plot of chunk unnamed-chunk-5" alt="plot of chunk unnamed-chunk-5" style="display: block; margin: auto 0 auto auto;" />
 
-# Economic well-being and the reformist vote at the provincial level
+## Economic well-being and the reformist vote at the provincial level
 
 So what does provincial level GDP (excluding oil output) tell us about Iranian voting habits? The conventional wisdom, in regards to divisions in Iranian politics, tells us that voting habits fall along class differences. The data, however, provides a more complex picture. Correlations between reformist vote share and unemployment, income inequality, and GDP growth all hover closer to zero. The correlation, however, between GDP/capita and reformist vote share at the provencial level is about 0.46, which suggests a weak relationship between the two at best. Linear regression analysis predicting vote share that includes each of the aforementioned economic indicators finds a positive and statistically significant, albiet weak, relationship between GDP/capita and reformist vote share only. At best, this analysis identifies a small relationship between economic well-being and Iranian voting habits, however, given the sample size of a single election and the problems associated with aggregating votes at the provincial level (as opposed to presinct level), these conclusions should be taken with a grain of salt. If economic well-being is a poor predictor of Iranian voting behavior, what factors might explain Iranian voter choice in 2016? Factors this analysis has overlooked include incumbency, religiousity, ethnicity, and education.
 
