@@ -12,7 +12,7 @@ output:
     mathjax: default
 ---
 
-# Elections in Iran
+## Elections in Iran
 
 The recent parliamentary elections in Iran were a big win for the reformist camp. They not only managed to secure a (slim) majority in the Iranian Majles, they were also successful in adding significant numbers of reformist sympathizers to Iran's Guardian Council -the organizational body tasked with selecting the next Supreme Leader to succeed Ayatollah Khamenei. A cursory examination of the results suggest that reformists performed particularly well in urban districts throughout the country and in Tehran in particular. One particular narrative that has emerged is that the upper class in Iran tend to vote reformist, while the working class poor gravitate towards the principalist camp.[^1] I bring this narrative under closer scrutiny using publicaly available data on the recent presidential and legislative elections. 
 
@@ -785,11 +785,13 @@ g1<-ggplot(data=data.df, aes(gdp.cap, reform_rat))+
   geom_point()+xlab("GDP/capita")+ylab("")
 g2<-ggplot(data=data.df, aes(gdp.grow, reform_rat))+
   geom_point()+xlab("GDP Growth")+ylab("")
-g3<-ggplot(data=data.df, aes(unemp.avg, reform_rat))+geom_point()+xlab("Unemployment")+ylab("")
+g3<-ggplot(data=data.df, aes(unemp.avg, reform_rat))+geom_point()+
+    xlab("Unemployment")+ylab("")
 g4<-ggplot(data=data.df, aes(gini, reform_rat))+
   geom_point() +xlab("Gini Coefficient")+ylab("")
 
-grid.arrange(g1,g2,g3,g4, top = textGrob("Reformist Vote Share", gp=gpar(fontface="bold", fontsize=22)))
+grid.arrange(g1,g2,g3,g4, top = textGrob("Reformist Vote Share", 
+      gp=gpar(fontface="bold", fontsize=22)))
 {% endhighlight %}
 
 <img src="/cmohamma.github.io/figure/source/2016-06-12-iranelections/unnamed-chunk-6-1.png" title="plot of chunk unnamed-chunk-1" alt="plot of chunk unnamed-chunk-1" style="display: block; margin: auto 0 auto auto;" />
