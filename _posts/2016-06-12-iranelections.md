@@ -792,4 +792,5 @@ g4<-ggplot(data=data.df, aes(gini, reform_rat))+
 grid.arrange(g1,g2,g3,g4, top = textGrob("Reformist Vote Share", gp=gpar(fontface="bold", fontsize=22)))
 {% endhighlight %}
 
-<im<img src="/cmohamma.github.io/figure/source/2016-06-12-iranelections/unnamed-chunk-5-1.png" title="plot of chunk unnamed-chunk-5" alt="plot of chunk unnamed-chunk-5" style="display: block; margin: auto 0 auto auto;" />
+<img src="/cmohamma.github.io/figure/source/2016-06-12-iranelections/unnamed-chunk-6-1.png" title="plot of chunk unnamed-chunk-1" alt="plot of chunk unnamed-chunk-1" style="display: block; margin: auto 0 auto auto;" />
+
