@@ -12,7 +12,7 @@ output:
     mathjax: default
 ---
 
-#Elections in Iran
+# Elections in Iran
 
 The recent parliamentary elections in Iran were a big win for the reformist camp. They not only managed to secure a (slim) majority in the Iranian Majles, they were also successful in adding significant numbers of reformist sympathizers to Iran's Guardian Council -the organizational body tasked with selecting the next Supreme Leader to succeed Ayatollah Khamenei. A cursory examination of the results suggest that reformists performed particularly well in urban districts throughout the country and in Tehran in particular. One particular narrative that has emerged is that the upper class in Iran tend to vote reformist, while the working class poor gravitate towards the principalist camp.[^1] I bring this narrative under closer scrutiny using publicaly available data on the recent presidential and legislative elections. 
 
@@ -20,7 +20,7 @@ The recent parliamentary elections in Iran were a big win for the reformist camp
 
 Before getting into the data, I'll provide some background on the mechanics of Iranian elections and the current political climate in the country. Then I'll go through the workflow of my analysis, which begins with scraping data from the web, cleaning it, graphing it, and then plotting a few correlations that examine the effect of provincial level economic well being on Iranian voting habits.
 
-##Presidential and Legislative Elections in Iran
+## Presidential and Legislative Elections in Iran
 
 Iran follows a two-round mixed-member district electoral voting system for its 290 member legislative body, which means 1) voters have the opporunity to elect one or more representatives per constituency and 2) leading candidates must secure at least 30% of the vote share in order to avoid a run-off against their nearest opponent. The numbers of seats is roughly allocated according to district population size. Districts size maxes out at 30 seats in Tehran, while the next largest is Tabriz with 6 and the the modal district size is 1. Of the 290 seats, 5 seats are reserved for officialy recognized religious minorities -one seat for Zoroastrians, one seat for Jews, two seats for Armenian Christians (North and South), and one seat for Assyrian and Chaldean Christians. 
 
@@ -72,7 +72,7 @@ ggplot(data.e, aes(x=x,y=y,col=party)) +
 
 <img src="/cmohamma.github.io/figure/source/2016-06-12-iranelections/unnamed-chunk-1-1.png" title="plot of chunk unnamed-chunk-1" alt="plot of chunk unnamed-chunk-1" style="display: block; margin: auto 0 auto auto;" />
 
-##A Word About Parties in Iran
+## A Word About Parties in Iran
 
 Iran does not have parties in the traditional sense of ideologically and strategically coherent political groups. This is in part due to norms that developed in the tumultuous atmosphere in which the Islamic Republic emerged. At the time of the revolution in 1979, the political lanscape was a checkerboard of various opposition groups united only by their will to collapse the Shah's regime. Once the monarchy fell a tentative alliance emerged between the Islamist and Nationalist camps, perhaps best exemplified by the working relationship between Ayatollah Khomeini and Abolhassan Bani Sadr. Just as relations between them soured (tension between the two culminated in Bani Sadr's resignation of the presidency and escape to France), so too did the tentative alliance between Nationalist and Islamist factions. Ultimately, the latter would emerge as triumphet. The harsh break with the Nationalists over the hostage taking crisis (amongst other disagreements), coupled with Saddam's attack on Iran, allowed the Islamist faction to consolidate its power at the ballot box. As a result, although minor ideological factions emerged in the Islamic Republic's nascent Constitutive Assembly, nothing resembling strong rivalrous parties took root. 
 
@@ -82,7 +82,7 @@ Nonetheless, in the 45 years since the revolution, two nominal factions have eme
 
 In the most recent legislative elections in 2016, the reformist camp were lagely represented by two allied "lists" (other minor moderate groups and independents allied with each list as well); The Pervasive Coalition of Reformists: The Second Step (ائتلاف فراگیر اصلاطلبان: گام دوم), otherwise known as the "list of hope" (لیست امید), lead by Mohammad Reza Aref and the Front for the National Voice (جبهه صدای ملت), led by Ali Motahari. The Principalist faction is represented by only one coalition this election cycle - the Principlists Grand Coalition (ائتلاف بزرگ اصولگرایان), led by Gholam Ali Haddad-Adel. In the most recent presidential elections in 2013, Rouhani ran as a reformer while he faced a slate of conservatives and conservative minded independents. In the next section, I introduce election and recent socioeconomic data on Iran.
 
-##The Data
+## The Data
 
 Data on the 2016 parliamentary elections are scraped from Wikipedia's persian language entry for that subject matter, while the data on the 2013 presidential election and socioeconomic data are scraped from the [Iran Data Portal](http://irandataportal.syr.edu) website hosted at Syracuse University.
 
@@ -769,7 +769,7 @@ ggplot(data=plot.df, aes(x=Province, y=f.diff))+
 
 <img src="/cmohamma.github.io/figure/source/2016-06-12-iranelections/unnamed-chunk-5-1.png" title="plot of chunk unnamed-chunk-5" alt="plot of chunk unnamed-chunk-5" style="display: block; margin: auto 0 auto auto;" />
 
-#Economic well-being and the reformist vote at the provincial level
+# Economic well-being and the reformist vote at the provincial level
 
 So what does provincial level GDP (excluding oil output) tell us about Iranian voting habits? The conventional wisdom, in regards to divisions in Iranian politics, tells us that voting habits fall along class differences. The data, however, provides a more complex picture. Correlations between reformist vote share and unemployment, income inequality, and GDP growth all hover closer to zero. The correlation, however, between GDP/capita and reformist vote share at the provencial level is about 0.46, which suggests a weak relationship between the two at best. Linear regression analysis predicting vote share that includes each of the aforementioned economic indicators finds a positive and statistically significant, albiet weak, relationship between GDP/capita and reformist vote share only. At best, this analysis identifies a small relationship between economic well-being and Iranian voting habits, however, given the sample size of a single election and the problems associated with aggregating votes at the provincial level (as opposed to presinct level), these conclusions should be taken with a grain of salt. If economic well-being is a poor predictor of Iranian voting behavior, what factors might explain Iranian voter choice in 2016? Factors this analysis has overlooked include incumbency, religiousity, ethnicity, and education.
 
