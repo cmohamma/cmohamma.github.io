@@ -136,7 +136,7 @@ ggplot(data.e, aes(x=x,y=y,col=party)) +
   annotate("text", x = 0.01, y = 0.15, size= 25, label = "290")
 {% endhighlight %}
 
-<img src="figure/source/2016-06-12-iranelections/unnamed-chunk-2-1.png" title="plot of chunk unnamed-chunk-2" alt="plot of chunk unnamed-chunk-2" style="display: block; margin: auto 0 auto auto;" />
+<img src="/cmohamma.github.io/figure/source/2016-06-12-iranelections/unnamed-chunk-2-1.png" title="plot of chunk unnamed-chunk-2" alt="plot of chunk unnamed-chunk-2" style="display: block; margin: auto 0 auto auto;" />
 
 For the analysis below, I aggregated the legislative election results across Iran's 31 provinces. Because the Islamic Republic uses a multi-member district voting system, each constituency has the opporunity to elect one or more candidates. Thus, to obtain faction vote shares in each province for the most recent legislative election, I have simply divided the number of seats won by each faction in each province by the total number of seats in each province. For example, the province of Zanjan has four voting districts. Of these four, three of them are single-member districts and one has two seats, for a total of five seats for the entire province. Of these five seats, two were won by reformist, two were won by independents, and one was won by a principalist, which results in 40% vote share for reformists and independents and 
 
@@ -767,7 +767,7 @@ ggplot(data=plot.df, aes(x=Province, y=f.diff))+
   ggtitle("Reformist Vote Share \n Legislative (2016) - Presidential (2014)")
 {% endhighlight %}
 
-<img src="figure/source/2016-06-12-iranelections/unnamed-chunk-5-1.png" title="plot of chunk unnamed-chunk-5" alt="plot of chunk unnamed-chunk-5" style="display: block; margin: auto 0 auto auto;" />
+<img src="/cmohamma.github.io/figure/source/2016-06-12-iranelections/unnamed-chunk-5-1.png" title="plot of chunk unnamed-chunk-5" alt="plot of chunk unnamed-chunk-5" style="display: block; margin: auto 0 auto auto;" />
 
 #Economic well-being and the reformist vote at the provincial level
 
@@ -792,4 +792,4 @@ g4<-ggplot(data=data.df, aes(gini, reform_rat))+
 grid.arrange(g1,g2,g3,g4, top = textGrob("Reformist Vote Share", gp=gpar(fontface="bold", fontsize=22)))
 {% endhighlight %}
 
-<img src="figure/source/2016-06-12-iranelections/unnamed-chunk-6-1.png" title="plot of chunk unnamed-chunk-6" alt="plot of chunk unnamed-chunk-6" style="display: block; margin: auto 0 auto auto;" />
+<img src="/cmohamma.github.io/figure/source/2016-06-12-iranelections/unnamed-chunk-6-1.png" title="plot of chunk unnamed-chunk-6" alt="plot of chunk unnamed-chunk-6" style="display: block; margin: auto 0 auto auto;" />
