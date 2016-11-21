@@ -70,7 +70,7 @@ ggplot(data.e, aes(x=x,y=y,col=party)) +
   annotate("text", x = 0.01, y = 0.15, size= 25, label = "290")
 {% endhighlight %}
 
-<img src="/cyrusmohammadian/desktop/cmohamma.github.io/figure/source/2016-06-12-iranelections/unnamed-chunk-1-1.png" title="plot of chunk unnamed-chunk-1" alt="plot of chunk unnamed-chunk-1" style="display: block; margin: auto 0 auto auto;" />
+<img src="cyrusmohammadian/Desktop/cmohamma.github.io/figure/source/2016-06-12-iranelections/unnamed-chunk-1-1.png" title="plot of chunk unnamed-chunk-1" alt="plot of chunk unnamed-chunk-1" style="display: block; margin: auto 0 auto auto;" />
 
 ##A Word About Parties in Iran
 
