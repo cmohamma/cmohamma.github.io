@@ -22,7 +22,7 @@ Before getting into the data, I'll provide some background on the mechanics of I
 
 ## Presidential and Legislative Elections in Iran
 
-Iran follows a two-round mixed-member district electoral voting system for its 290 member legislative body, which means 1) voters have the opporunity to elect one or more representatives per constituency and 2) leading candidates must secure at least 30% of the vote share in order to avoid a run-off against their nearest opponent. The numbers of seats is roughly allocated according to district population size. Districts size maxes out at 30 seats in Tehran, while the next largest is Tabriz with 6 and the the modal district size is 1. Of the 290 seats, 5 seats are reserved for officialy recognized religious minorities -one seat for Zoroastrians, one seat for Jews, two seats for Armenian Christians (North and South), and one seat for Assyrian and Chaldean Christians. 
+Iran follows a two-round mixed-member district electoral voting system for its 290 member legislative body, which means 1) voters have the opporunity to elect one or more representatives per constituency and 2) leading candidates must secure at least 30% of the vote share in order to avoid a run-off against their nearest opponent. The number of seats is roughly allocated according to district population size. Districts size maxes out at 30 seats in Tehran, while the next largest is Tabriz with 6 and the the modal district size is 1. Of the 290 seats, 5 seats are reserved for officialy recognized religious minorities -one seat for Zoroastrians, one seat for Jews, two seats for Armenian Christians (North and South), and one seat for Assyrian and Chaldean Christians. 
 
 
 {% highlight r %}
