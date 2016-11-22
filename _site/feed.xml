@@ -6,8 +6,8 @@
 </description>
     <link>https://cmohamma.github.io/</link>
     <atom:link href="https://cmohamma.github.io/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Mon, 21 Nov 2016 19:58:33 -0800</pubDate>
-    <lastBuildDate>Mon, 21 Nov 2016 19:58:33 -0800</lastBuildDate>
+    <pubDate>Mon, 21 Nov 2016 20:01:20 -0800</pubDate>
+    <lastBuildDate>Mon, 21 Nov 2016 20:01:20 -0800</lastBuildDate>
     <generator>Jekyll v3.2.1</generator>
     
       <item>
@@ -2086,9 +2086,13 @@ FALSE It has 12 fields&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
         <description>&lt;p&gt;The refugee crisis that is currently rocking the &lt;a href=&quot;https://www.washingtonpost.com/news/monkey-cage/wp/2016/05/14/the-real-refugee-crisis-is-in-the-middle-east-not-europe/&quot;&gt;Middle East&lt;/a&gt;
  and &lt;a href=&quot;http://www.bbc.com/news/world-europe-34131911&quot;&gt;Europe&lt;/a&gt; has renewed public as well as scholarly attention to the issue of forced migration. Just how bad is the current refugee crisis? The graph below shows a time series of forced migrants as a proportion of world population from 1960-2013 along side major political upheavals. The size of the dots are proportional to the number of forced migrants that event produced during the entirety of its duration. The global refugee crisis emerging from the Syrian civil war has proven to be the worst crises of forced migration since WWII. Nearly 10 million &lt;a href=&quot;http://data.unhcr.org/syrianrefugees/regional.php&quot;&gt;Syrians&lt;/a&gt; have fled their homes either to IDP camps in Syria or refugee camps across the Middle East and Europe.&lt;/p&gt;
 
+&lt;p&gt;&lt;img src=&quot;/cmohamma.github.io/figure/source/2016-04-15-refugees/unnamed-chunk-1-1.png&quot; alt=&quot;plot of chunk unnamed-chunk-1&quot; style=&quot;display: block; margin: auto 0 auto auto;&quot; /&gt;&lt;/p&gt;
+
 &lt;p&gt;The conventional wisdom in the literature on forced migration and conflict suggests refugees pose a danger to the states that host them, typically in the form of recruits and added pressure on the local population. This is most succinctly captured in the notion of the &lt;a href=&quot;https://journals.lib.unb.ca/index.php/jcs/article/view/11672/12401&quot;&gt;refugee warrior&lt;/a&gt;. Yet my &lt;a href=&quot;http://media.wix.com/ugd/7bd45b_53a228613618476b9d730b9bf9342465.pdf&quot;&gt;research&lt;/a&gt; has shown that far from being active participants in war, forced migrants are typically victimized bystanders even in the regions they have sought refugee. Nonetheless, popular perception of refugees as deliberate vectors of conflict transmission persist. Similarly, &lt;a href=&quot;http://ftp.iza.org/dp8841.pdf&quot;&gt;recent work&lt;/a&gt; on the effect of refugees on employment in Turkey uncovers no evidence to support the notion that refugees crowd out natives in local labor markets.&lt;/p&gt;
 
 &lt;p&gt;All this suggests that the growing concerns over the influx of refugees to Western states may be overblown. The graph below shows Google searches for the terms “Refugees”, “Syrian Civil War”, and “Terrorism” since 2014 along with the actual incidents of conflict. The y-axis in the graph represents Google’s normalized search metric for each search term. The x-axis represents the time range from 2014-2016, along with the locations of major terrorist incidents in the Western world during that same time period. According to Google Trends, each data point is divided by the total searches of the geography and time range it represents. The resulting numbers are then scaled to a range of 0 to 100.&lt;sup id=&quot;fnref:1&quot;&gt;&lt;a href=&quot;#fn:1&quot; class=&quot;footnote&quot;&gt;1&lt;/a&gt;&lt;/sup&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/cmohamma.github.io/figure/source/2016-04-15-refugees/unnamed-chunk-1-2.png&quot; alt=&quot;plot of chunk unnamed-chunk-2&quot; style=&quot;display: block; margin: auto 0 auto auto;&quot; /&gt;&lt;/p&gt;
 
 &lt;div class=&quot;footnotes&quot;&gt;
   &lt;ol&gt;
