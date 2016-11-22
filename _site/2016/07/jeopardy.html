@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width initial-scale=1" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <title>Jeopardy and Big Data</title>
+    <meta name="description" content="My musings on politics, pop culture, sports, and pretty much anything else I can find data on.
+">
+
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="canonical" href="https://cmohamma.github.io/2016/07/jeopardy.html">
+</head>
+
+
+  <body>
+
+    <header class="site-header">
+
+  <div class="wrapper">
+
+    <a class="site-title" href="/">Where's the Data?</a>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg viewBox="0 0 18 15">
+          <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+
+      <div class="trigger">
+        
+          
+          <a class="page-link" href="/about/">About</a>
+          
+        
+          
+        
+          
+        
+          
+        
+      </div>
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <div class="page-content">
+      <div class="wrapper">
+        <div class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">Jeopardy and Big Data</h1>
+    <p class="post-meta">Jul 10, 2016 • Cyrus Mohammadian</p>
+  </header>
+
+  <article class="post-content">
+    <h2 id="r-markdown">R Markdown</h2>
+
+<p>Those of you who read this blog already know I love data science but those that know me well know that Jeopardy is also one of my dearest passions. Using a <a href="http://j-archive.com">website</a> that relies on user submissions to track every game, player, answer, clue, and score, I’ve compiled a sqlite database with that information stored in a series of tables. The data release is complete from 2015 back to 1997 -much of the 1990s before 1997 is near complete (I guesstimate around 85%) but data on games played before the 90s is sparse.</p>
+
+<p>As an initial exercise, I thought it would be neat to look at the distribution of contestants’ hometowns. Which cities and regions produce the most contestants? I used sqlite and a number of R packages to manage and manipulate the data.</p>
+
+<p>The first plot below maps the hometowns of each jeopardy contestant in the dataset. As expected, densely populated regions produce more participants -Southern California, the Bay Area, Tristate Region, and the Northeast.</p>
+
+<figure class="highlight"><pre><code class="language-r" data-lang="r"><span class="c1">#Load dependencies
+</span><span class="n">library</span><span class="p">(</span><span class="n">RSQLite</span><span class="p">)</span><span class="w"> </span><span class="c1">#data retrieval 
+</span><span class="n">library</span><span class="p">(</span><span class="n">dplyr</span><span class="p">)</span><span class="w"> </span><span class="c1">#data management
+</span><span class="n">library</span><span class="p">(</span><span class="n">devtools</span><span class="p">)</span><span class="w"> </span><span class="c1">#install
+</span><span class="n">library</span><span class="p">(</span><span class="n">ggplot2</span><span class="p">)</span><span class="w"> </span><span class="c1">#graphing
+</span><span class="n">library</span><span class="p">(</span><span class="n">USAboundaries</span><span class="p">)</span><span class="w"> </span><span class="c1">#mapping
+</span><span class="n">library</span><span class="p">(</span><span class="n">splitstackshape</span><span class="p">)</span><span class="w"> </span><span class="c1">#data management
+</span><span class="n">library</span><span class="p">(</span><span class="n">cowplot</span><span class="p">)</span><span class="w"> </span><span class="c1">#ggplot2 theme
+</span><span class="n">library</span><span class="p">(</span><span class="n">maps</span><span class="p">)</span><span class="w"> </span><span class="c1">#mapping
+</span><span class="w">
+
+</span><span class="c1">#Connect to local SQL server and download data
+</span><span class="n">temp</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">tempfile</span><span class="p">()</span><span class="w">
+</span><span class="n">download.file</span><span class="p">(</span><span class="s2">"https://github.com/cmohamma/jeopardy/blob/master/database.sqlite?raw=true"</span><span class="p">,</span><span class="w"> </span><span class="n">temp</span><span class="p">)</span><span class="w">
+</span><span class="n">db</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">dbConnect</span><span class="p">(</span><span class="n">SQLite</span><span class="p">(),</span><span class="w"> </span><span class="n">dbname</span><span class="o">=</span><span class="n">temp</span><span class="p">)</span><span class="w">
+</span><span class="n">dbListTables</span><span class="p">(</span><span class="n">db</span><span class="p">)</span></code></pre></figure>
+
+<figure class="highlight"><pre><code class="language-text" data-lang="text">FALSE  [1] "Strike1Players"         "Strike2Players"        
+FALSE  [3] "Strike3Players"         "ThreeStrikesClues"     
+FALSE  [5] "WrongAnswers"           "categories"            
+FALSE  [7] "clue_wrong_answers"     "clues"                 
+FALSE  [9] "final"                  "final_jeopardy_answers"
+FALSE [11] "game_players"           "games"                 
+FALSE [13] "players"                "sqlite_sequence"       
+FALSE [15] "temp"</code></pre></figure>
+
+<figure class="highlight"><pre><code class="language-r" data-lang="r"><span class="n">players</span><span class="o">&lt;-</span><span class="w"> </span><span class="n">dbGetQuery</span><span class="p">(</span><span class="w"> </span><span class="n">db</span><span class="p">,</span><span class="s1">'
+                      select location 
+                      from players
+                      '</span><span class="w"> </span><span class="p">)</span><span class="w">
+
+</span><span class="c1">#Exclude celebrity, university, and military based on 
+#associated key words
+</span><span class="n">players_loc</span><span class="o">&lt;-</span><span class="n">filter</span><span class="p">(</span><span class="n">players</span><span class="p">,</span><span class="w"> </span><span class="n">grepl</span><span class="p">(</span><span class="s2">","</span><span class="p">,</span><span class="w"> </span><span class="n">location</span><span class="p">))</span><span class="w">
+</span><span class="n">players_loc</span><span class="o">&lt;-</span><span class="n">filter</span><span class="p">(</span><span class="n">players_loc</span><span class="p">,</span><span class="w"> </span><span class="o">!</span><span class="n">grepl</span><span class="p">(</span><span class="s2">"University|College|from|and"</span><span class="p">,</span><span class="w"> </span><span class="n">location</span><span class="p">))</span><span class="w">
+</span><span class="n">players_loc</span><span class="o">&lt;-</span><span class="n">filter</span><span class="p">(</span><span class="n">players_loc</span><span class="p">,</span><span class="w"> </span><span class="o">!</span><span class="n">grepl</span><span class="p">(</span><span class="s2">"stationed|now"</span><span class="p">,</span><span class="w"> </span><span class="n">location</span><span class="p">))</span><span class="w">
+</span><span class="n">players_loc</span><span class="o">&lt;-</span><span class="n">filter</span><span class="p">(</span><span class="n">players_loc</span><span class="p">,</span><span class="w"> </span><span class="o">!</span><span class="n">grepl</span><span class="p">(</span><span class="s2">"E.R.|Frasier|Performing|Talk|Comedians|Horror|Crosby|Medicine|Legal|Spinal|Whisperer|Yellowstone"</span><span class="p">,</span><span class="w"> 
+                                        </span><span class="n">location</span><span class="p">))</span></code></pre></figure>
+
+<figure class="highlight"><pre><code class="language-r" data-lang="r"><span class="c1">#Batch geocode with Bing
+</span><span class="n">options</span><span class="p">(</span><span class="n">BingMapsKey</span><span class="o">=</span><span class="s2">"AtquMkrNaB7ME7krIpwQgrTwEqwB0HbUEpRKb9wfpBW-xCbgBzrGabEyUGkdpO0G"</span><span class="p">)</span><span class="w">
+
+</span><span class="n">coord</span><span class="o">&lt;-</span><span class="n">geocodeVect</span><span class="p">(</span><span class="n">players_loc</span><span class="o">$</span><span class="n">location</span><span class="p">,</span><span class="w"> </span><span class="n">service</span><span class="o">=</span><span class="s2">"bing"</span><span class="p">,</span><span class="w"> </span><span class="c1">#geocodeVect is a loaded function -see below post for script
+</span><span class="w">                       </span><span class="n">returntype</span><span class="o">=</span><span class="s2">"coordinates"</span><span class="p">)</span><span class="w">
+</span><span class="n">coord.full</span><span class="o">&lt;-</span><span class="n">as.data.frame</span><span class="p">(</span><span class="n">t</span><span class="p">(</span><span class="n">as.data.frame</span><span class="p">(</span><span class="n">coord</span><span class="p">)))</span><span class="w">
+</span><span class="n">coord.full</span><span class="o">$</span><span class="n">location</span><span class="o">&lt;-</span><span class="n">rownames</span><span class="p">(</span><span class="n">coord.full</span><span class="p">)</span><span class="w">
+</span><span class="n">rownames</span><span class="p">(</span><span class="n">coord.full</span><span class="p">)</span><span class="o">&lt;-</span><span class="kc">NULL</span><span class="w">
+
+</span><span class="c1">#Clean date
+</span><span class="n">coord.full</span><span class="o">$</span><span class="n">loc</span><span class="o">&lt;-</span><span class="n">gsub</span><span class="p">(</span><span class="s1">'[[:digit:]]'</span><span class="p">,</span><span class="w"> </span><span class="s1">''</span><span class="p">,</span><span class="w"> </span><span class="n">coord.full</span><span class="o">$</span><span class="n">location</span><span class="p">)</span><span class="w">
+</span><span class="n">coord.full</span><span class="o">$</span><span class="n">loc</span><span class="o">&lt;-</span><span class="n">gsub</span><span class="p">(</span><span class="s2">".."</span><span class="p">,</span><span class="w"> </span><span class="s2">", "</span><span class="p">,</span><span class="w"> </span><span class="n">coord.full</span><span class="o">$</span><span class="n">loc</span><span class="p">,</span><span class="w"> </span><span class="n">fixed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">TRUE</span><span class="p">)</span><span class="w">
+</span><span class="n">coord.full</span><span class="o">$</span><span class="n">loc</span><span class="o">&lt;-</span><span class="n">gsub</span><span class="p">(</span><span class="s2">"."</span><span class="p">,</span><span class="w"> </span><span class="s2">" "</span><span class="p">,</span><span class="w"> </span><span class="n">coord.full</span><span class="o">$</span><span class="n">loc</span><span class="p">,</span><span class="w"> </span><span class="n">fixed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">TRUE</span><span class="p">)</span><span class="w">
+</span><span class="n">coord.full</span><span class="o">$</span><span class="n">loc</span><span class="o">&lt;-</span><span class="n">gsub</span><span class="p">(</span><span class="s2">"St, "</span><span class="p">,</span><span class="w"> </span><span class="s2">"St. "</span><span class="p">,</span><span class="w"> </span><span class="n">coord.full</span><span class="o">$</span><span class="n">loc</span><span class="p">,</span><span class="w"> </span><span class="n">fixed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">TRUE</span><span class="p">)</span><span class="w">
+</span><span class="n">coord.full</span><span class="o">$</span><span class="n">loc</span><span class="o">&lt;-</span><span class="n">gsub</span><span class="p">(</span><span class="s2">"Mt, "</span><span class="p">,</span><span class="w"> </span><span class="s2">"Mt. "</span><span class="p">,</span><span class="w"> </span><span class="n">coord.full</span><span class="o">$</span><span class="n">loc</span><span class="p">,</span><span class="w"> </span><span class="n">fixed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">TRUE</span><span class="p">)</span><span class="w">
+</span><span class="n">coord.full</span><span class="o">$</span><span class="n">loc2</span><span class="o">&lt;-</span><span class="n">gsub</span><span class="p">(</span><span class="s2">" D C,"</span><span class="p">,</span><span class="w"> </span><span class="s2">" DC"</span><span class="p">,</span><span class="w"> </span><span class="n">coord.full</span><span class="o">$</span><span class="n">loc</span><span class="p">,</span><span class="w"> </span><span class="n">fixed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">TRUE</span><span class="p">)</span><span class="w">
+</span><span class="n">coord.full</span><span class="o">$</span><span class="n">loc2</span><span class="p">[</span><span class="n">coord.full</span><span class="o">$</span><span class="n">loc2</span><span class="o">==</span><span class="s2">"Washington, D C "</span><span class="p">]</span><span class="o">&lt;-</span><span class="s2">"Washington, DC"</span><span class="w">
+
+</span><span class="n">coord.full</span><span class="o">&lt;-</span><span class="n">cSplit</span><span class="p">(</span><span class="n">coord.full</span><span class="p">,</span><span class="w"> </span><span class="s2">"loc2"</span><span class="p">,</span><span class="w"> </span><span class="s2">","</span><span class="p">)</span><span class="w">
+</span><span class="n">coord.full</span><span class="o">$</span><span class="n">loc2_1_c</span><span class="o">&lt;-</span><span class="nf">as.character</span><span class="p">(</span><span class="n">coord.full</span><span class="o">$</span><span class="n">loc2_1</span><span class="p">)</span><span class="w">
+</span><span class="n">coord.full</span><span class="o">$</span><span class="n">loc2_2_c</span><span class="o">&lt;-</span><span class="nf">as.character</span><span class="p">(</span><span class="n">coord.full</span><span class="o">$</span><span class="n">loc2_2</span><span class="p">)</span><span class="w">
+</span><span class="n">coord.full</span><span class="o">$</span><span class="n">loc2_3_c</span><span class="o">&lt;-</span><span class="nf">as.character</span><span class="p">(</span><span class="n">coord.full</span><span class="o">$</span><span class="n">loc2_3</span><span class="p">)</span><span class="w">
+</span><span class="n">coord.full</span><span class="p">[</span><span class="n">coord.full</span><span class="o">$</span><span class="n">loc2_2_c</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">"British Columbia"</span><span class="p">,</span><span class="w"> </span><span class="s2">"loc2_3_c"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s2">"Canada"</span><span class="w">
+</span><span class="n">coord.full</span><span class="p">[</span><span class="n">coord.full</span><span class="o">$</span><span class="n">loc2_1</span><span class="o">==</span><span class="s2">"Antwerp"</span><span class="p">,</span><span class="w"> </span><span class="s2">"loc2_3_c"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s2">"Belgium"</span><span class="w">
+</span><span class="n">coord.full</span><span class="p">[</span><span class="n">coord.full</span><span class="o">$</span><span class="n">loc2_2_c</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">"Canada"</span><span class="p">,</span><span class="w"> </span><span class="s2">"loc2_3_c"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s2">"Canada"</span><span class="w">
+</span><span class="n">coord.full</span><span class="p">[</span><span class="n">coord.full</span><span class="o">$</span><span class="n">loc2_2_c</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">"China"</span><span class="p">,</span><span class="w"> </span><span class="s2">"loc2_3_c"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s2">"China"</span><span class="w">
+</span><span class="n">coord.full</span><span class="p">[</span><span class="n">coord.full</span><span class="o">$</span><span class="n">loc2_2_c</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">"Cuba"</span><span class="p">,</span><span class="w"> </span><span class="s2">"loc2_3_c"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s2">"Cuba"</span><span class="w">
+</span><span class="n">coord.full</span><span class="p">[</span><span class="n">coord.full</span><span class="o">$</span><span class="n">loc2_2_c</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">"Germany"</span><span class="p">,</span><span class="w"> </span><span class="s2">"loc2_3_c"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s2">"Germany"</span><span class="w">
+</span><span class="n">coord.full</span><span class="o">$</span><span class="n">loc2_2_c</span><span class="p">[</span><span class="n">coord.full</span><span class="o">$</span><span class="n">loc2_2_c</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">"Ilinois"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s2">"Illinois"</span><span class="w">
+</span><span class="n">coord.full</span><span class="p">[</span><span class="n">coord.full</span><span class="o">$</span><span class="n">loc2_2_c</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">"Mexico"</span><span class="p">,</span><span class="w"> </span><span class="s2">"loc2_3_c"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s2">"Mexico"</span><span class="w">
+</span><span class="n">coord.full</span><span class="p">[</span><span class="n">coord.full</span><span class="o">$</span><span class="n">loc2_2_c</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">"Ontario"</span><span class="p">,</span><span class="w"> </span><span class="s2">"loc2_3_c"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s2">"Canada"</span><span class="w">
+</span><span class="n">coord.full</span><span class="p">[</span><span class="n">coord.full</span><span class="o">$</span><span class="n">loc2_2_c</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">"Philippines"</span><span class="p">,</span><span class="w"> </span><span class="s2">"loc2_3_c"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s2">"Philippines"</span><span class="w">
+</span><span class="n">coord.full</span><span class="p">[</span><span class="n">coord.full</span><span class="o">$</span><span class="n">loc2_2_c</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">"Quebec"</span><span class="p">,</span><span class="w"> </span><span class="s2">"loc2_3_c"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s2">"Canada"</span><span class="w">
+</span><span class="n">coord.full</span><span class="p">[</span><span class="n">coord.full</span><span class="o">$</span><span class="n">loc2_2_c</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">"South Africa"</span><span class="p">,</span><span class="w"> </span><span class="s2">"loc2_3_c"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s2">"South Africa"</span><span class="w">
+</span><span class="n">coord.full</span><span class="o">$</span><span class="n">loc2_2_c</span><span class="p">[</span><span class="n">coord.full</span><span class="o">$</span><span class="n">loc2_2_c</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">"West Germany"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s2">"Germany"</span><span class="w">
+</span><span class="n">coord.full</span><span class="p">[</span><span class="n">coord.full</span><span class="o">$</span><span class="n">loc2_2_c</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">"Germany"</span><span class="p">,</span><span class="w"> </span><span class="s2">"loc2_3_c"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s2">"Germany"</span><span class="w">
+</span><span class="n">coord.full</span><span class="p">[</span><span class="n">coord.full</span><span class="o">$</span><span class="n">loc2_1_c</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">"Hameln"</span><span class="p">,</span><span class="w"> </span><span class="s2">"loc2_3_c"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s2">"Germany"</span><span class="w">
+</span><span class="n">coord.full</span><span class="p">[</span><span class="n">coord.full</span><span class="o">$</span><span class="n">loc2_2_c</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">"India"</span><span class="p">,</span><span class="w"> </span><span class="s2">"loc2_3_c"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s2">"India"</span><span class="w">
+</span><span class="n">coord.full</span><span class="p">[</span><span class="n">coord.full</span><span class="o">$</span><span class="n">loc2_2_c</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">"Italy"</span><span class="p">,</span><span class="w"> </span><span class="s2">"loc2_3_c"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s2">"Italy"</span><span class="w">
+</span><span class="n">coord.full</span><span class="p">[</span><span class="n">coord.full</span><span class="o">$</span><span class="n">loc2_2_c</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">"Japan"</span><span class="p">,</span><span class="w"> </span><span class="s2">"loc2_3_c"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s2">"Japan"</span><span class="w">
+</span><span class="n">coord.full</span><span class="o">$</span><span class="n">loc2_2_c</span><span class="p">[</span><span class="n">coord.full</span><span class="o">$</span><span class="n">loc2_2_c</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">"Indinia"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s2">"Indiana"</span><span class="w">
+</span><span class="n">coord.full</span><span class="p">[</span><span class="n">coord.full</span><span class="o">$</span><span class="n">loc2_2_c</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">"Manitoba"</span><span class="p">,</span><span class="w"> </span><span class="s2">"loc2_3_c"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s2">"Canada"</span><span class="w">
+</span><span class="n">coord.full</span><span class="p">[</span><span class="n">coord.full</span><span class="o">$</span><span class="n">loc2_2_c</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">"Alberta"</span><span class="p">,</span><span class="w"> </span><span class="s2">"loc2_3_c"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s2">"Canada"</span><span class="w">
+</span><span class="n">coord.full</span><span class="p">[</span><span class="n">coord.full</span><span class="o">$</span><span class="n">loc2_2_c</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">"Austria"</span><span class="p">,</span><span class="w"> </span><span class="s2">"loc2_3_c"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s2">"Austria"</span><span class="w">
+</span><span class="n">coord.full</span><span class="p">[</span><span class="n">coord.full</span><span class="o">$</span><span class="n">loc2_2_c</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">"Czechoslovakia"</span><span class="p">,</span><span class="w"> </span><span class="s2">"loc2_3_c"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s2">"Czechoslovakia"</span><span class="w">
+</span><span class="n">coord.full</span><span class="p">[</span><span class="n">coord.full</span><span class="o">$</span><span class="n">loc2_2_c</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">"Denmark"</span><span class="p">,</span><span class="w"> </span><span class="s2">"loc2_3_c"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s2">"Denmark"</span><span class="w">
+</span><span class="n">coord.full</span><span class="p">[</span><span class="n">coord.full</span><span class="o">$</span><span class="n">loc2_2_c</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">"Estonia"</span><span class="p">,</span><span class="w"> </span><span class="s2">"loc2_3_c"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s2">"Estonia"</span><span class="w">
+</span><span class="n">coord.full</span><span class="p">[</span><span class="n">coord.full</span><span class="o">$</span><span class="n">loc2_2_c</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">"Hungary"</span><span class="p">,</span><span class="w"> </span><span class="s2">"loc2_3_c"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s2">"Hungary"</span><span class="w">
+</span><span class="n">coord.full</span><span class="p">[</span><span class="n">coord.full</span><span class="o">$</span><span class="n">loc2_2_c</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">"Indonesia"</span><span class="p">,</span><span class="w"> </span><span class="s2">"loc2_3_c"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s2">"Indonesia"</span><span class="w">
+</span><span class="n">coord.full</span><span class="p">[</span><span class="n">coord.full</span><span class="o">$</span><span class="n">loc2_2_c</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">"Israel"</span><span class="p">,</span><span class="w"> </span><span class="s2">"loc2_3_c"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s2">"Israel"</span><span class="w">
+</span><span class="n">coord.full</span><span class="p">[</span><span class="n">coord.full</span><span class="o">$</span><span class="n">loc2_2_c</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">"Northwest Territories"</span><span class="p">,</span><span class="w"> </span><span class="s2">"loc2_3_c"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s2">"Canada"</span><span class="w">
+</span><span class="n">coord.full</span><span class="p">[</span><span class="n">coord.full</span><span class="o">$</span><span class="n">loc2_2_c</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">"Nova Scotia"</span><span class="p">,</span><span class="w"> </span><span class="s2">"loc2_3_c"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s2">"Canada"</span><span class="w">
+</span><span class="n">coord.full</span><span class="p">[</span><span class="n">coord.full</span><span class="o">$</span><span class="n">loc2_2_c</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">"Norway"</span><span class="p">,</span><span class="w"> </span><span class="s2">"loc2_3_c"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s2">"Norway"</span><span class="w">
+</span><span class="n">coord.full</span><span class="o">$</span><span class="n">loc2_2_c</span><span class="p">[</span><span class="n">coord.full</span><span class="o">$</span><span class="n">loc2_2_c</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">"Ontario Canada"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s2">"Ontario"</span><span class="w">
+</span><span class="n">coord.full</span><span class="p">[</span><span class="n">coord.full</span><span class="o">$</span><span class="n">loc2_2_c</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">"Peru"</span><span class="p">,</span><span class="w"> </span><span class="s2">"loc2_3_c"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s2">"Peru"</span><span class="w">
+</span><span class="n">coord.full</span><span class="p">[</span><span class="n">coord.full</span><span class="o">$</span><span class="n">loc2_2_c</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">"Russia"</span><span class="p">,</span><span class="w"> </span><span class="s2">"loc2_3_c"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s2">"Russia"</span><span class="w">
+</span><span class="n">coord.full</span><span class="p">[</span><span class="n">coord.full</span><span class="o">$</span><span class="n">loc2_2_c</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">"Sweden"</span><span class="p">,</span><span class="w"> </span><span class="s2">"loc2_3_c"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s2">"Sweden"</span><span class="w">
+</span><span class="n">coord.full</span><span class="p">[</span><span class="n">coord.full</span><span class="o">$</span><span class="n">loc2_2_c</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">"Ukraine"</span><span class="p">,</span><span class="w"> </span><span class="s2">"loc2_3_c"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s2">"Ukraine"</span><span class="w">
+</span><span class="n">coord.full</span><span class="p">[</span><span class="n">coord.full</span><span class="o">$</span><span class="n">loc2_2_c</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">"United Kingdom"</span><span class="p">,</span><span class="w"> </span><span class="s2">"loc2_3_c"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s2">"United Kingdom"</span><span class="w">
+</span><span class="n">coord.full</span><span class="p">[</span><span class="n">coord.full</span><span class="o">$</span><span class="n">loc2_2_c</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">"West Indies"</span><span class="p">,</span><span class="w"> </span><span class="s2">"loc2_3_c"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s2">"West Indies"</span><span class="w">
+</span><span class="n">coord.full</span><span class="p">[</span><span class="n">coord.full</span><span class="o">$</span><span class="n">loc2_2_c</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">"Australia"</span><span class="p">,</span><span class="w"> </span><span class="s2">"loc2_3_c"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s2">"Australia"</span><span class="w">
+</span><span class="n">coord.full</span><span class="p">[</span><span class="n">coord.full</span><span class="o">$</span><span class="n">loc2_2_c</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">"Zaire"</span><span class="p">,</span><span class="w"> </span><span class="s2">"loc2_3_c"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s2">"Zaire"</span><span class="w">
+</span><span class="n">coord.full</span><span class="p">[</span><span class="n">coord.full</span><span class="o">$</span><span class="n">loc2_2_c</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">"IL"</span><span class="p">,</span><span class="w"> </span><span class="s2">"loc2_3_c"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s2">"Illinois"</span><span class="w">
+</span><span class="n">coord.full</span><span class="o">$</span><span class="n">loc2_2_c</span><span class="p">[</span><span class="n">coord.full</span><span class="o">$</span><span class="n">loc2_2_c</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">"Ilinois"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s2">"Illinois"</span><span class="w">
+</span><span class="n">coord.full</span><span class="o">$</span><span class="n">loc2_3_c</span><span class="p">[</span><span class="nf">is.na</span><span class="p">(</span><span class="n">coord.full</span><span class="o">$</span><span class="n">loc2_3_c</span><span class="p">)]</span><span class="o">&lt;-</span><span class="s2">"USA"</span><span class="w">
+</span><span class="n">coord.full</span><span class="o">$</span><span class="n">loc2_2_c</span><span class="p">[</span><span class="n">coord.full</span><span class="o">$</span><span class="n">loc2_2_c</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">"Las Vegas"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s2">"Nevada"</span><span class="w">
+</span><span class="n">coord.full</span><span class="o">&lt;-</span><span class="n">filter</span><span class="p">(</span><span class="n">coord.full</span><span class="p">,</span><span class="w"> </span><span class="n">location</span><span class="o">!=</span><span class="s2">"Beverly.Hills..90210"</span><span class="p">)</span><span class="w">
+</span><span class="n">coord.full</span><span class="o">&lt;-</span><span class="n">filter</span><span class="p">(</span><span class="n">coord.full</span><span class="p">,</span><span class="w"> </span><span class="n">loc2_2</span><span class="o">!=</span><span class="s2">"NA"</span><span class="p">)</span><span class="w">
+</span><span class="n">coord.full</span><span class="o">&lt;-</span><span class="n">filter</span><span class="p">(</span><span class="n">coord.full</span><span class="p">,</span><span class="w"> </span><span class="n">V</span><span class="m">1</span><span class="o">!=</span><span class="s2">"NA"</span><span class="p">)</span><span class="w">
+
+</span><span class="c1">#Subset to US only
+</span><span class="n">coord.full</span><span class="o">&lt;-</span><span class="n">filter</span><span class="p">(</span><span class="n">coord.full</span><span class="p">,</span><span class="w"> </span><span class="n">loc2_3_c</span><span class="o">==</span><span class="s2">"USA"</span><span class="p">)</span><span class="w">
+
+</span><span class="n">jeop.loc</span><span class="o">&lt;-</span><span class="n">coord.full</span><span class="w">
+</span><span class="n">jeop.loc</span><span class="o">&lt;-</span><span class="n">select</span><span class="p">(</span><span class="n">jeop.loc</span><span class="p">,</span><span class="w"> </span><span class="n">location</span><span class="p">,</span><span class="w"> </span><span class="n">loc2_1_c</span><span class="p">,</span><span class="w"> </span><span class="n">loc2_2_c</span><span class="p">,</span><span class="w"> </span><span class="n">loc2_3_c</span><span class="p">,</span><span class="w"> </span><span class="n">V</span><span class="m">1</span><span class="p">,</span><span class="w"> </span><span class="n">V</span><span class="m">2</span><span class="p">)</span><span class="w">
+</span><span class="n">colnames</span><span class="p">(</span><span class="n">jeop.loc</span><span class="p">)</span><span class="o">&lt;-</span><span class="nf">c</span><span class="p">(</span><span class="s2">"location"</span><span class="p">,</span><span class="s2">"city"</span><span class="p">,</span><span class="w"> </span><span class="s2">"state"</span><span class="p">,</span><span class="s2">"country"</span><span class="p">,</span><span class="s2">"lat"</span><span class="p">,</span><span class="s2">"long"</span><span class="p">)</span><span class="w">
+
+</span><span class="c1">#More data cleaning
+</span><span class="n">jeop.loc</span><span class="p">[</span><span class="n">jeop.loc</span><span class="o">$</span><span class="n">state</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">"India"</span><span class="p">,</span><span class="w"> </span><span class="s2">"country"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s2">"India"</span><span class="w">
+</span><span class="n">jeop.loc</span><span class="p">[</span><span class="n">jeop.loc</span><span class="o">$</span><span class="n">state</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">"Germany"</span><span class="p">,</span><span class="w"> </span><span class="s2">"country"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s2">"Germany"</span><span class="w">
+</span><span class="n">jeop.loc</span><span class="p">[</span><span class="n">jeop.loc</span><span class="o">$</span><span class="n">state</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">"Japan"</span><span class="p">,</span><span class="w"> </span><span class="s2">"country"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s2">"Japan"</span><span class="w">
+</span><span class="n">jeop.loc</span><span class="p">[</span><span class="n">jeop.loc</span><span class="o">$</span><span class="n">state</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">"Italy"</span><span class="p">,</span><span class="w"> </span><span class="s2">"country"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s2">"Italy"</span><span class="w">
+</span><span class="n">jeop.loc</span><span class="p">[</span><span class="n">jeop.loc</span><span class="o">$</span><span class="n">state</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">"Manitoba"</span><span class="p">,</span><span class="w"> </span><span class="s2">"country"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s2">"Canada"</span><span class="w">
+</span><span class="n">jeop.loc</span><span class="o">$</span><span class="n">state</span><span class="p">[</span><span class="n">jeop.loc</span><span class="o">$</span><span class="n">state</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">"New Nork"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s2">"New York"</span><span class="w">
+</span><span class="n">jeop.loc</span><span class="p">[</span><span class="n">jeop.loc</span><span class="o">$</span><span class="n">state</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">"Montreal"</span><span class="p">,</span><span class="w"> </span><span class="s2">"country"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s2">"Canada"</span><span class="w">
+</span><span class="n">jeop.loc</span><span class="o">$</span><span class="n">state</span><span class="p">[</span><span class="n">jeop.loc</span><span class="o">$</span><span class="n">state</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">"IL"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s2">"Illinois"</span><span class="w">
+</span><span class="n">jeop.loc</span><span class="p">[</span><span class="n">jeop.loc</span><span class="o">$</span><span class="n">state</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">"Manitoba "</span><span class="p">,</span><span class="w"> </span><span class="s2">"country"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s2">"Canada"</span><span class="w">
+</span><span class="n">jeop.loc</span><span class="o">$</span><span class="n">state</span><span class="p">[</span><span class="n">jeop.loc</span><span class="o">$</span><span class="n">state</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">"Deleware"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s2">"Delaware"</span><span class="w">
+</span><span class="n">jeop.loc</span><span class="p">[</span><span class="n">jeop.loc</span><span class="o">$</span><span class="n">state</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">"Turkey"</span><span class="p">,</span><span class="w"> </span><span class="s2">"country"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s2">"Turkey"</span><span class="w">
+</span><span class="n">jeop.loc</span><span class="o">$</span><span class="n">state</span><span class="p">[</span><span class="n">jeop.loc</span><span class="o">$</span><span class="n">state</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">"Kenrucky"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s2">"Kentucky"</span><span class="w">
+</span><span class="n">jeop.loc</span><span class="o">$</span><span class="n">state</span><span class="p">[</span><span class="n">jeop.loc</span><span class="o">$</span><span class="n">state</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">"Caifornia"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s2">"California"</span><span class="w">
+</span><span class="n">jeop.loc</span><span class="o">$</span><span class="n">state</span><span class="p">[</span><span class="n">jeop.loc</span><span class="o">$</span><span class="n">state</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">"Onio"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s2">"Ohio"</span><span class="w">
+</span><span class="n">jeop.loc</span><span class="o">$</span><span class="n">state</span><span class="p">[</span><span class="n">jeop.loc</span><span class="o">$</span><span class="n">state</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">"Missiouri"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s2">"Missouri"</span><span class="w">
+</span><span class="n">jeop.loc</span><span class="o">$</span><span class="n">state</span><span class="p">[</span><span class="n">jeop.loc</span><span class="o">$</span><span class="n">state</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">"Nevade"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s2">"Nevada"</span><span class="w">
+</span><span class="n">jeop.loc</span><span class="o">$</span><span class="n">state</span><span class="p">[</span><span class="n">jeop.loc</span><span class="o">$</span><span class="n">state</span><span class="o">==</span><span class="s2">"DC"</span><span class="p">]</span><span class="o">&lt;-</span><span class="s2">"District of Columbia"</span><span class="w">
+
+</span><span class="c1">#Get count by city
+</span><span class="n">jeop.loc.point</span><span class="o">&lt;-</span><span class="n">jeop.loc</span><span class="w"> </span><span class="o">%&gt;%</span><span class="w">
+  </span><span class="n">group_by</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span><span class="w"> </span><span class="n">long</span><span class="p">,</span><span class="w"> </span><span class="n">city</span><span class="p">,</span><span class="w"> </span><span class="n">state</span><span class="p">)</span><span class="w"> </span><span class="o">%&gt;%</span><span class="w">
+  </span><span class="n">filter</span><span class="p">(</span><span class="n">country</span><span class="o">==</span><span class="s2">"USA"</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">state</span><span class="o">!=</span><span class="s2">"American Samoa"</span><span class="p">)</span><span class="w"> </span><span class="o">%&gt;%</span><span class="w">
+  </span><span class="n">summarize</span><span class="p">(</span><span class="n">count</span><span class="o">=</span><span class="n">n</span><span class="p">())</span><span class="w">
+
+</span><span class="c1">#Obtain map
+</span><span class="n">states</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">map_data</span><span class="p">(</span><span class="s2">"state"</span><span class="p">)</span><span class="w">
+</span><span class="n">states</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">states</span><span class="p">[</span><span class="n">order</span><span class="p">(</span><span class="n">states</span><span class="o">$</span><span class="n">order</span><span class="p">),</span><span class="w"> </span><span class="p">]</span><span class="w">
+</span><span class="n">jeop.loc.point</span><span class="o">&lt;-</span><span class="n">as.data.frame</span><span class="p">(</span><span class="n">jeop.loc.point</span><span class="p">)</span><span class="w">
+
+</span><span class="c1">#Continental US only for 1st map
+</span><span class="n">jeop.contin</span><span class="o">&lt;-</span><span class="n">filter</span><span class="p">(</span><span class="n">jeop.loc.point</span><span class="p">,</span><span class="w"> </span><span class="n">state</span><span class="o">!=</span><span class="s2">"Alaska"</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">state</span><span class="o">!=</span><span class="s2">"Hawaii"</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">long</span><span class="o">&lt;</span><span class="w"> </span><span class="m">-3</span><span class="p">)</span><span class="w">
+
+</span><span class="c1">#Map it
+</span><span class="n">ggplot</span><span class="p">()</span><span class="w"> </span><span class="o">+</span><span class="w">
+  </span><span class="n">geom_polygon</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">states</span><span class="p">,</span><span class="w"> </span><span class="n">aes</span><span class="p">(</span><span class="n">long</span><span class="p">,</span><span class="w"> </span><span class="n">lat</span><span class="p">,</span><span class="w"> </span><span class="n">group</span><span class="o">=</span><span class="n">group</span><span class="p">),</span><span class="n">size</span><span class="o">=</span><span class="m">0.1</span><span class="p">,</span><span class="n">fill</span><span class="o">=</span><span class="s2">"grey"</span><span class="p">,</span><span class="w"> </span><span class="n">color</span><span class="o">=</span><span class="s2">"black"</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w">
+  </span><span class="n">geom_point</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">jeop.contin</span><span class="p">,</span><span class="w"> </span><span class="n">aes</span><span class="p">(</span><span class="n">long</span><span class="p">,</span><span class="w"> </span><span class="n">lat</span><span class="p">,</span><span class="w"> </span><span class="n">size</span><span class="o">=</span><span class="n">count</span><span class="p">),</span><span class="w"> </span><span class="n">color</span><span class="o">=</span><span class="s2">"red"</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w">
+  </span><span class="n">geom_point</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">jeop.contin</span><span class="p">,</span><span class="w"> 
+             </span><span class="n">shape</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">1</span><span class="p">,</span><span class="w"> </span><span class="n">aes</span><span class="p">(</span><span class="n">long</span><span class="p">,</span><span class="w"> </span><span class="n">lat</span><span class="p">,</span><span class="w"> </span><span class="n">size</span><span class="o">=</span><span class="n">count</span><span class="p">),</span><span class="w"> </span><span class="n">colour</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"black"</span><span class="p">,</span><span class="w"> </span><span class="n">alpha</span><span class="o">=</span><span class="m">0.2</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w">
+  </span><span class="n">theme</span><span class="p">(</span><span class="n">axis.line</span><span class="o">=</span><span class="n">element_blank</span><span class="p">(),</span><span class="w"> 
+        </span><span class="n">axis.text</span><span class="o">=</span><span class="n">element_blank</span><span class="p">(),</span><span class="w"> 
+        </span><span class="n">axis.ticks</span><span class="o">=</span><span class="n">element_blank</span><span class="p">())</span><span class="w"> </span><span class="o">+</span><span class="w">
+  </span><span class="n">xlab</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">ylab</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span><span class="w"> </span></code></pre></figure>
+
+<p><img src="/cmohamma.github.io/figure/source/2016-07-10-jeopardy/unnamed-chunk-3-1.png" title="plot of chunk unnamed-chunk-3" alt="plot of chunk unnamed-chunk-3" style="display: block; margin: auto 0 auto auto;" /></p>
+
+<p>The ten most represented cities among Jeopardy contestants are:</p>
+
+<ol>
+  <li>Los Angeles, CA 316</li>
+  <li>New York City, NY 299</li>
+  <li>Washington, D.C. 228</li>
+  <li>Chicago, IL 197</li>
+  <li>Brooklyn, NY 142</li>
+  <li>San Diego, CA 108</li>
+  <li>Atlanta, GA 101</li>
+  <li>Seattle, WA 101</li>
+  <li>Philadelphia, PA 90</li>
+  <li>Arlington, VA 89</li>
+</ol>
+
+<p>Of course, these cities are among some of the most populated in the country. But which cities or regions produce more contestants relative to their overall populations? To answer that the data needs to be normalized according to population. One simple way to do this is to look at all major cities with populations above 40,000 and divide the number of contestants by the total population and then multiply by 10,000 to get the number of contestants per 10,000 residents. The ten most represented major cities relative to population among Jeopardy contestants are (rounded to nearest whole number):</p>
+
+<ol>
+  <li>Marietta, GA 5</li>
+  <li>Arlington, VA 5</li>
+  <li>Cambridge, MA 4</li>
+  <li>Washington DC 4</li>
+  <li>Santa Monica, CA 4</li>
+  <li>Arlington, MA 3</li>
+  <li>Somerville, MA 3</li>
+  <li>Wilmington, DE 3</li>
+  <li>Oak Park, IL 3</li>
+  <li>Evanston, IL 3</li>
+</ol>
+
+<p>Mapping city densities creates too many overlapping visual cues and the data above doesn’t include smaller cities. Another way of normalizing the data by population that also allows for easy mapping is to aggregate the total number of contestants per county and divide that figure by the county’s total population. To visualize the entirety of the data using a normalized density measure, I’ve aggregated the total number of contestants for each of the US’s 3,000 + counties (Alaska and Hawaii included) and divided that figure by each county’s population total and mapped it using R’s ggplot2 function.</p>
+
+<figure class="highlight"><pre><code class="language-r" data-lang="r"><span class="c1">#Again produce county by city (because data must be in [tbl_1, data.frame] format)
+</span><span class="n">jeop.loc.point</span><span class="o">&lt;-</span><span class="n">jeop.loc</span><span class="w"> </span><span class="o">%&gt;%</span><span class="w">
+  </span><span class="n">group_by</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span><span class="w"> </span><span class="n">long</span><span class="p">,</span><span class="w"> </span><span class="n">city</span><span class="p">,</span><span class="w"> </span><span class="n">state</span><span class="p">)</span><span class="w"> </span><span class="o">%&gt;%</span><span class="w">
+  </span><span class="n">filter</span><span class="p">(</span><span class="n">country</span><span class="o">==</span><span class="s2">"USA"</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">state</span><span class="o">!=</span><span class="s2">"American Samoa"</span><span class="p">)</span><span class="w"> </span><span class="o">%&gt;%</span><span class="w">
+  </span><span class="n">summarize</span><span class="p">(</span><span class="n">count</span><span class="o">=</span><span class="n">n</span><span class="p">())</span><span class="w">
+
+</span><span class="c1">#Degroup data frame
+</span><span class="n">jeop.loc.point</span><span class="o">$</span><span class="n">lat2</span><span class="o">&lt;-</span><span class="n">jeop.loc.point</span><span class="o">$</span><span class="n">lat</span><span class="w">
+</span><span class="n">jeop.loc.point</span><span class="o">&lt;-</span><span class="n">jeop.loc.point</span><span class="p">[,</span><span class="m">2</span><span class="o">:</span><span class="m">6</span><span class="p">]</span><span class="w">
+</span><span class="n">jeop.loc.point</span><span class="o">$</span><span class="n">lat</span><span class="o">&lt;-</span><span class="n">jeop.loc.point</span><span class="o">$</span><span class="n">lat2</span><span class="w">
+</span><span class="n">jeop.loc.point</span><span class="o">$</span><span class="n">lat2</span><span class="o">&lt;-</span><span class="kc">NULL</span><span class="w">
+</span><span class="n">jeop.loc.point</span><span class="o">&lt;-</span><span class="n">select</span><span class="p">(</span><span class="n">jeop.loc.point</span><span class="p">,</span><span class="w"> </span><span class="n">lat</span><span class="p">,</span><span class="w"> </span><span class="n">long</span><span class="p">,</span><span class="w"> </span><span class="n">city</span><span class="p">,</span><span class="w"> </span><span class="n">state</span><span class="p">,</span><span class="w"> </span><span class="n">count</span><span class="p">)</span><span class="w">
+
+</span><span class="c1">#Load dependencies
+</span><span class="n">devtools</span><span class="o">::</span><span class="n">install_github</span><span class="p">(</span><span class="s2">"hrbrmstr/albersusa"</span><span class="p">)</span><span class="w">
+</span><span class="n">library</span><span class="p">(</span><span class="n">albersusa</span><span class="p">)</span><span class="w">
+</span><span class="n">library</span><span class="p">(</span><span class="n">readr</span><span class="p">)</span><span class="w">
+</span><span class="n">library</span><span class="p">(</span><span class="n">dplyr</span><span class="p">)</span><span class="w">
+</span><span class="n">library</span><span class="p">(</span><span class="n">rgeos</span><span class="p">)</span><span class="w">
+</span><span class="n">library</span><span class="p">(</span><span class="n">maptools</span><span class="p">)</span><span class="w">
+</span><span class="n">library</span><span class="p">(</span><span class="n">ggplot2</span><span class="p">)</span><span class="w">
+</span><span class="n">library</span><span class="p">(</span><span class="n">ggalt</span><span class="p">)</span><span class="w">
+</span><span class="n">library</span><span class="p">(</span><span class="n">ggthemes</span><span class="p">)</span><span class="w">
+</span><span class="n">library</span><span class="p">(</span><span class="n">viridis</span><span class="p">)</span><span class="w">
+</span><span class="n">library</span><span class="p">(</span><span class="n">rgdal</span><span class="p">)</span><span class="w">
+
+</span><span class="c1">#Begin mapping
+</span><span class="n">df</span><span class="o">&lt;-</span><span class="n">jeop.loc.point</span><span class="w">
+</span><span class="n">usa</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">counties_composite</span><span class="p">()</span><span class="w"> 
+
+</span><span class="c1">#Get map
+</span><span class="n">URL</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s2">"http://eric.clst.org/wupl/Stuff/gz_2010_us_050_00_500k.json"</span><span class="w">
+</span><span class="n">fil</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">basename</span><span class="p">(</span><span class="n">URL</span><span class="p">)</span><span class="w">
+</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">file.exists</span><span class="p">(</span><span class="n">fil</span><span class="p">))</span><span class="w"> </span><span class="n">download.file</span><span class="p">(</span><span class="n">URL</span><span class="p">,</span><span class="w"> </span><span class="n">fil</span><span class="p">)</span><span class="w">
+</span><span class="n">orig_counties</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">readOGR</span><span class="p">(</span><span class="n">fil</span><span class="p">,</span><span class="w"> </span><span class="s2">"OGRGeoJSON"</span><span class="p">,</span><span class="w"> </span><span class="n">stringsAsFactors</span><span class="o">=</span><span class="kc">FALSE</span><span class="p">)</span></code></pre></figure>
+
+<figure class="highlight"><pre><code class="language-text" data-lang="text">FALSE OGR data source with driver: GeoJSON 
+FALSE Source: "gz_2010_us_050_00_500k.json", layer: "OGRGeoJSON"
+FALSE with 3221 features
+FALSE It has 6 fields</code></pre></figure>
+
+<figure class="highlight"><pre><code class="language-r" data-lang="r"><span class="c1">#Add CRS format
+</span><span class="n">pts</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">as.data.frame</span><span class="p">(</span><span class="n">df</span><span class="p">[,</span><span class="m">1</span><span class="o">:</span><span class="m">2</span><span class="p">])</span><span class="w">
+</span><span class="n">coordinates</span><span class="p">(</span><span class="n">pts</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="o">~</span><span class="n">long</span><span class="o">+</span><span class="n">lat</span><span class="w">
+</span><span class="n">proj4string</span><span class="p">(</span><span class="n">pts</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">CRS</span><span class="p">(</span><span class="n">proj4string</span><span class="p">(</span><span class="n">orig_counties</span><span class="p">))</span><span class="w">
+
+</span><span class="c1">#Spatial overlay with fips code
+</span><span class="n">bind_cols</span><span class="p">(</span><span class="n">df</span><span class="p">,</span><span class="w"> </span><span class="n">over</span><span class="p">(</span><span class="n">pts</span><span class="p">,</span><span class="w"> </span><span class="n">orig_counties</span><span class="p">))</span><span class="w"> </span><span class="o">%&gt;%</span><span class="w"> 
+  </span><span class="n">mutate</span><span class="p">(</span><span class="n">fips</span><span class="o">=</span><span class="n">sprintf</span><span class="p">(</span><span class="s2">"%s%s"</span><span class="p">,</span><span class="w"> </span><span class="n">STATE</span><span class="p">,</span><span class="w"> </span><span class="n">COUNTY</span><span class="p">))</span><span class="w"> </span><span class="o">%&gt;%</span><span class="w"> 
+  </span><span class="n">count</span><span class="p">(</span><span class="n">fips</span><span class="p">,</span><span class="w"> </span><span class="n">wt</span><span class="o">=</span><span class="n">count</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">df</span><span class="w">
+
+</span><span class="c1">#Merge data back with original map data and generate count/population
+</span><span class="n">final</span><span class="o">&lt;-</span><span class="n">merge</span><span class="p">(</span><span class="n">usa</span><span class="o">@</span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="n">df</span><span class="p">,</span><span class="n">by</span><span class="o">=</span><span class="s2">"fips"</span><span class="p">,</span><span class="n">all.x</span><span class="o">=</span><span class="kc">FALSE</span><span class="p">)</span><span class="w">
+</span><span class="n">final</span><span class="o">$</span><span class="n">popn</span><span class="o">&lt;-</span><span class="n">final</span><span class="o">$</span><span class="n">n</span><span class="o">/</span><span class="n">final</span><span class="o">$</span><span class="n">population</span><span class="w">
+</span><span class="n">final</span><span class="o">$</span><span class="n">popn</span><span class="o">&lt;-</span><span class="n">final</span><span class="o">$</span><span class="n">popn</span><span class="o">*</span><span class="m">10000</span><span class="w">
+
+</span><span class="c1">#Fortify data for ggplot2 graphics
+</span><span class="n">usa_map</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">fortify</span><span class="p">(</span><span class="n">usa</span><span class="p">,</span><span class="w"> </span><span class="n">region</span><span class="o">=</span><span class="s2">"fips"</span><span class="p">)</span><span class="w">
+
+</span><span class="c1">#Map
+</span><span class="n">gg</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">ggplot</span><span class="p">()</span><span class="w">
+</span><span class="n">gg</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">gg</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">geom_map</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">usa_map</span><span class="p">,</span><span class="w"> </span><span class="n">map</span><span class="o">=</span><span class="n">usa_map</span><span class="p">,</span><span class="w">
+                    </span><span class="n">aes</span><span class="p">(</span><span class="n">long</span><span class="p">,</span><span class="w"> </span><span class="n">lat</span><span class="p">,</span><span class="w"> </span><span class="n">map_id</span><span class="o">=</span><span class="n">id</span><span class="p">),</span><span class="w">
+                    </span><span class="n">color</span><span class="o">=</span><span class="s2">"#b2b2b2"</span><span class="p">,</span><span class="w"> </span><span class="n">size</span><span class="o">=</span><span class="m">0.05</span><span class="p">,</span><span class="w"> </span><span class="n">fill</span><span class="o">=</span><span class="s2">"white"</span><span class="p">)</span><span class="w">
+</span><span class="n">gg</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">gg</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">geom_map</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">final</span><span class="p">,</span><span class="w"> </span><span class="n">map</span><span class="o">=</span><span class="n">usa_map</span><span class="p">,</span><span class="w">
+                    </span><span class="n">aes</span><span class="p">(</span><span class="n">fill</span><span class="o">=</span><span class="n">popn</span><span class="p">,</span><span class="w"> </span><span class="n">map_id</span><span class="o">=</span><span class="n">fips</span><span class="p">),</span><span class="w">
+                    </span><span class="n">color</span><span class="o">=</span><span class="s2">"#b2b2b2"</span><span class="p">,</span><span class="w"> </span><span class="n">size</span><span class="o">=</span><span class="m">0.05</span><span class="p">)</span><span class="w">
+</span><span class="n">gg</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">gg</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">scale_fill_viridis</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"Count"</span><span class="p">,</span><span class="w"> </span><span class="n">trans</span><span class="o">=</span><span class="s2">"log10"</span><span class="p">)</span><span class="w">
+</span><span class="n">gg</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">gg</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">coord_proj</span><span class="p">(</span><span class="n">us_aeqd_proj</span><span class="p">)</span><span class="w">
+</span><span class="n">gg</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">gg</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">theme_map</span><span class="p">()</span><span class="w">
+</span><span class="n">gg</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">gg</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">theme</span><span class="p">(</span><span class="n">legend.position</span><span class="o">=</span><span class="nf">c</span><span class="p">(</span><span class="m">0.85</span><span class="p">,</span><span class="w"> </span><span class="m">0.2</span><span class="p">))</span><span class="w">
+</span><span class="n">gg</span></code></pre></figure>
+
+<p><img src="/cmohamma.github.io/figure/source/2016-07-10-jeopardy/unnamed-chunk-4-1.png" title="plot of chunk unnamed-chunk-4" alt="plot of chunk unnamed-chunk-4" style="display: block; margin: auto 0 auto auto;" /></p>
+
+<p>Normalizing the data by population reveals that many of the most “contestant dense” counties are actually found in low density regions such as the Northeast and the Midwest. Querying the top search results reveals the top 10<sup id="fnref:1"><a href="#fn:1" class="footnote">1</a></sup> most contestant dense counties in the country.<sup id="fnref:2"><a href="#fn:2" class="footnote">2</a></sup></p>
+
+<p>The query results confirm our visual inspect that contestant dense counties tend to be less densely populated. In fact, of the 10 most contest dense counties, only two counties had a population of greater than 45,000 -Washington D.C. and Arlington, VA. Also worthy of note, the D.C. metropolitan area in particular and Virginia more broadly, seem to be fertile breeding grounds for Jeopardy contestants. Of the 10 most contestant dense counties in the US, 6 are found in Virginia alone (not to mention D.C.).</p>
+
+<ol>
+  <li>Falls Church, VA 13</li>
+  <li>Fairfax, VA 8</li>
+  <li>Hyde, South Dakota 7</li>
+  <li>Siskiyou, California 6</li>
+  <li>Fredericksburg, VA 5</li>
+  <li>Charlottesville, VA 5</li>
+  <li>Arlington, VA 4</li>
+  <li>Washington D.C. 4</li>
+  <li>Williamsburg, VA 4</li>
+  <li>Rush, KS 3</li>
+</ol>
+
+<p>Of counties with populations greater than 500,000, the 10 top ten most contestant dense are the following:</p>
+
+<ol>
+  <li>Washington D.C.</li>
+  <li>Queens, NY</li>
+  <li>Suffolk, MA</li>
+  <li>Middlesex, MA</li>
+  <li>Fulton, GA</li>
+  <li>San Francisco, CA</li>
+  <li>Los Angeles, CA</li>
+  <li>Travis, TX</li>
+  <li>Fairfax, VA</li>
+  <li>Denver, CO</li>
+</ol>
+
+<p>In future installments of this blog, I’ll identify the most successful counties by total games won and total money won and I’ll continue exploring other facets of the data as well.</p>
+
+<figure class="highlight"><pre><code class="language-r" data-lang="r"><span class="c1">#Google Maps API limits querys to 2500 per day and fails to geocode smaller towns. So I wrote a function to geocode using Bing's API. It's also much faster than ggmaps's geocode().
+</span><span class="w">
+</span><span class="n">geocode</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="k">function</span><span class="p">(</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">verbose</span><span class="o">=</span><span class="kc">FALSE</span><span class="p">,</span><span class="w"> </span><span class="n">service</span><span class="o">=</span><span class="s2">"google"</span><span class="p">,</span><span class="w"> </span><span class="n">returntype</span><span class="o">=</span><span class="s2">"coordinates"</span><span class="p">,</span><span class="w"> </span><span class="n">...</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+  </span><span class="nf">UseMethod</span><span class="p">(</span><span class="s2">"geocode"</span><span class="p">,</span><span class="n">x</span><span class="p">)</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span><span class="n">geocode.default</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="k">function</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="kc">FALSE</span><span class="p">,</span><span class="w"> </span><span class="n">service</span><span class="o">=</span><span class="s2">"google"</span><span class="p">,</span><span class="w"> </span><span class="n">returntype</span><span class="o">=</span><span class="s2">"coordinates"</span><span class="p">,</span><span class="w"> </span><span class="n">...</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+  </span><span class="k">if</span><span class="p">(</span><span class="w"> </span><span class="nf">is.na</span><span class="p">(</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">gsub</span><span class="p">(</span><span class="s2">" *"</span><span class="p">,</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">""</span><span class="w">  </span><span class="p">)</span><span class="w"> </span><span class="nf">return</span><span class="p">(</span><span class="nf">c</span><span class="p">(</span><span class="kc">NA</span><span class="p">,</span><span class="kc">NA</span><span class="p">))</span><span class="w">
+  </span><span class="n">service</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">tolower</span><span class="p">(</span><span class="n">service</span><span class="p">)</span><span class="w">
+  </span><span class="n">BingMapsKey</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">getOption</span><span class="p">(</span><span class="s2">"BingMapsKey"</span><span class="p">)</span><span class="w">
+  </span><span class="k">if</span><span class="p">(</span><span class="n">service</span><span class="o">==</span><span class="s2">"bing"</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nf">is.null</span><span class="p">(</span><span class="n">BingMapsKey</span><span class="p">)</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="n">stop</span><span class="p">(</span><span class="s2">"To use Bing, you must save your Bing Maps API key (obtain at http://msdn.microsoft.com/en-us/library/ff428642.aspx) using options(BingMapsKey='mykey').\n"</span><span class="p">)</span><span class="w">
+  </span><span class="n">construct.geocode.url</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">list</span><span class="p">()</span><span class="w">
+  </span><span class="n">construct.geocode.url</span><span class="p">[[</span><span class="s2">"google"</span><span class="p">]]</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="k">function</span><span class="p">(</span><span class="n">address</span><span class="p">,</span><span class="w"> </span><span class="n">return.call</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"json"</span><span class="p">,</span><span class="w"> </span><span class="n">sensor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"false"</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="n">root</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s2">"http://maps.google.com/maps/api/geocode/"</span><span class="w">
+    </span><span class="n">u</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">paste</span><span class="p">(</span><span class="n">root</span><span class="p">,</span><span class="w"> </span><span class="n">return.call</span><span class="p">,</span><span class="w"> </span><span class="s2">"?address="</span><span class="p">,</span><span class="w"> </span><span class="n">address</span><span class="p">,</span><span class="w"> </span><span class="s2">"&amp;sensor="</span><span class="p">,</span><span class="w"> </span><span class="n">sensor</span><span class="p">,</span><span class="w"> </span><span class="n">sep</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">""</span><span class="p">)</span><span class="w">
+    </span><span class="nf">return</span><span class="p">(</span><span class="n">URLencode</span><span class="p">(</span><span class="n">u</span><span class="p">))</span><span class="w">  
+  </span><span class="p">}</span><span class="w">
+  </span><span class="n">construct.geocode.url</span><span class="p">[[</span><span class="s2">"bing"</span><span class="p">]]</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="k">function</span><span class="p">(</span><span class="n">address</span><span class="p">,</span><span class="w"> </span><span class="n">maxResults</span><span class="o">=</span><span class="m">1</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="n">root</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s2">"http://dev.virtualearth.net/REST/v1/Locations"</span><span class="w">
+    </span><span class="n">u</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">paste0</span><span class="p">(</span><span class="n">root</span><span class="p">,</span><span class="w"> </span><span class="s2">"?query="</span><span class="p">,</span><span class="w"> </span><span class="n">address</span><span class="p">,</span><span class="w"> </span><span class="s2">"&amp;maxResults="</span><span class="p">,</span><span class="n">maxResults</span><span class="p">,</span><span class="s2">"&amp;key="</span><span class="p">,</span><span class="n">BingMapsKey</span><span class="p">)</span><span class="w">
+    </span><span class="nf">return</span><span class="p">(</span><span class="n">URLencode</span><span class="p">(</span><span class="n">u</span><span class="p">))</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+  </span><span class="k">if</span><span class="p">(</span><span class="n">verbose</span><span class="p">)</span><span class="w"> </span><span class="n">message</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">appendLF</span><span class="o">=</span><span class="kc">FALSE</span><span class="p">)</span><span class="w">
+  </span><span class="n">u</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">construct.geocode.url</span><span class="p">[[</span><span class="n">service</span><span class="p">]](</span><span class="n">x</span><span class="p">)</span><span class="w">
+  </span><span class="n">doc</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">RCurl</span><span class="o">::</span><span class="n">getURL</span><span class="p">(</span><span class="n">u</span><span class="p">)</span><span class="w">
+  </span><span class="n">j</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">RJSONIO</span><span class="o">::</span><span class="n">fromJSON</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span><span class="n">simplify</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">FALSE</span><span class="p">)</span><span class="w">
+  </span><span class="n">parse.json</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">list</span><span class="p">()</span><span class="w">
+  </span><span class="n">parse.json</span><span class="p">[[</span><span class="s2">"google"</span><span class="p">]]</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="k">function</span><span class="p">(</span><span class="n">j</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="k">if</span><span class="p">(</span><span class="n">j</span><span class="o">$</span><span class="n">status</span><span class="o">==</span><span class="s2">"OK"</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="n">res</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">list</span><span class="p">()</span><span class="w">
+      </span><span class="k">if</span><span class="p">(</span><span class="w"> </span><span class="s2">"coordinates"</span><span class="w"> </span><span class="o">%in%</span><span class="w"> </span><span class="n">returntype</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+        </span><span class="n">lat</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">j</span><span class="o">$</span><span class="n">results</span><span class="p">[[</span><span class="m">1</span><span class="p">]]</span><span class="o">$</span><span class="n">geometry</span><span class="o">$</span><span class="n">location</span><span class="o">$</span><span class="n">lat</span><span class="w">
+        </span><span class="n">lng</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">j</span><span class="o">$</span><span class="n">results</span><span class="p">[[</span><span class="m">1</span><span class="p">]]</span><span class="o">$</span><span class="n">geometry</span><span class="o">$</span><span class="n">location</span><span class="o">$</span><span class="n">lng</span><span class="w">
+        </span><span class="n">res</span><span class="o">$</span><span class="n">coordinates</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">c</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span><span class="w"> </span><span class="n">lng</span><span class="p">)</span><span class="w">
+      </span><span class="p">}</span><span class="w">
+      </span><span class="k">if</span><span class="p">(</span><span class="w"> </span><span class="s2">"zip"</span><span class="w"> </span><span class="o">%in%</span><span class="w"> </span><span class="n">returntype</span><span class="w"> </span><span class="p">)</span><span class="w">  </span><span class="p">{</span><span class="w">
+        </span><span class="n">zp</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">j</span><span class="o">$</span><span class="n">results</span><span class="p">[[</span><span class="m">1</span><span class="p">]]</span><span class="o">$</span><span class="n">address_components</span><span class="p">[[</span><span class="m">8</span><span class="p">]]</span><span class="o">$</span><span class="n">short_name</span><span class="w">
+        </span><span class="k">if</span><span class="p">(</span><span class="w"> </span><span class="n">j</span><span class="o">$</span><span class="n">results</span><span class="p">[[</span><span class="m">1</span><span class="p">]]</span><span class="o">$</span><span class="n">address_components</span><span class="p">[[</span><span class="m">8</span><span class="p">]]</span><span class="o">$</span><span class="n">types</span><span class="p">[[</span><span class="m">1</span><span class="p">]]</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="s2">"postal_code"</span><span class="w"> </span><span class="p">)</span><span class="w">  </span><span class="n">warning</span><span class="p">(</span><span class="n">paste</span><span class="p">(</span><span class="s2">"Not sure these zips are actually zips.  Type:"</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="o">$</span><span class="n">results</span><span class="p">[[</span><span class="m">1</span><span class="p">]]</span><span class="o">$</span><span class="n">address_components</span><span class="p">[[</span><span class="m">8</span><span class="p">]]</span><span class="o">$</span><span class="n">types</span><span class="p">[[</span><span class="m">1</span><span class="p">]])</span><span class="w"> </span><span class="p">)</span><span class="w">
+        </span><span class="n">res</span><span class="o">$</span><span class="n">zip</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">zp</span><span class="w">
+      </span><span class="p">}</span><span class="w">
+      </span><span class="nf">return</span><span class="p">(</span><span class="w"> </span><span class="n">res</span><span class="w"> </span><span class="p">)</span><span class="w">
+    </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="k">if</span><span class="p">(</span><span class="n">j</span><span class="o">$</span><span class="n">status</span><span class="o">==</span><span class="s2">"OVER_QUERY_LIMIT"</span><span class="p">)</span><span class="w"> </span><span class="n">warning</span><span class="p">(</span><span class="s2">"Google's geocoding quota appears to have been reached for the day."</span><span class="p">)</span><span class="w">
+      </span><span class="nf">return</span><span class="p">(</span><span class="nf">c</span><span class="p">(</span><span class="kc">NA</span><span class="p">,</span><span class="kc">NA</span><span class="p">))</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+  </span><span class="n">parse.json</span><span class="p">[[</span><span class="s2">"bing"</span><span class="p">]]</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="k">function</span><span class="p">(</span><span class="n">j</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="k">if</span><span class="p">(</span><span class="n">j</span><span class="o">$</span><span class="n">authenticationResultCode</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="s2">"ValidCredentials"</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="n">warning</span><span class="p">(</span><span class="s2">"Your BingMapsKey was not accepted."</span><span class="p">)</span><span class="w">
+      </span><span class="nf">return</span><span class="p">(</span><span class="nf">c</span><span class="p">(</span><span class="kc">NA</span><span class="p">,</span><span class="kc">NA</span><span class="p">))</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+    </span><span class="k">if</span><span class="p">(</span><span class="n">j</span><span class="o">$</span><span class="n">statusDescription</span><span class="o">!=</span><span class="s2">"OK"</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="n">warning</span><span class="p">(</span><span class="s2">"Something went wrong. Bing Maps API return status code "</span><span class="p">,</span><span class="n">j</span><span class="o">$</span><span class="n">statusCode</span><span class="p">,</span><span class="s2">" - "</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="o">$</span><span class="n">statusDescription</span><span class="p">)</span><span class="w">
+      </span><span class="nf">return</span><span class="p">(</span><span class="nf">c</span><span class="p">(</span><span class="kc">NA</span><span class="p">,</span><span class="kc">NA</span><span class="p">))</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+    </span><span class="k">if</span><span class="p">(</span><span class="n">j</span><span class="o">$</span><span class="n">resourceSets</span><span class="p">[[</span><span class="m">1</span><span class="p">]]</span><span class="o">$</span><span class="n">estimatedTotal</span><span class="o">==</span><span class="m">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="n">warning</span><span class="p">(</span><span class="s2">"Didn't find any points"</span><span class="p">)</span><span class="w">
+      </span><span class="nf">return</span><span class="p">(</span><span class="nf">c</span><span class="p">(</span><span class="kc">NA</span><span class="p">,</span><span class="kc">NA</span><span class="p">))</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+    </span><span class="k">if</span><span class="p">(</span><span class="n">verbose</span><span class="p">)</span><span class="w"> </span><span class="n">message</span><span class="p">(</span><span class="s2">" - Confidence: "</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="o">$</span><span class="n">resourceSets</span><span class="p">[[</span><span class="m">1</span><span class="p">]]</span><span class="o">$</span><span class="n">resources</span><span class="p">[[</span><span class="m">1</span><span class="p">]]</span><span class="o">$</span><span class="n">confidence</span><span class="w"> </span><span class="p">,</span><span class="n">appendLF</span><span class="o">=</span><span class="kc">FALSE</span><span class="p">)</span><span class="w">
+    </span><span class="n">res</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">list</span><span class="p">()</span><span class="w">
+    </span><span class="k">if</span><span class="p">(</span><span class="w"> </span><span class="s2">"coordinates"</span><span class="w"> </span><span class="o">%in%</span><span class="w"> </span><span class="n">returntype</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="n">crds</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">unlist</span><span class="p">(</span><span class="n">j</span><span class="o">$</span><span class="n">resourceSets</span><span class="p">[[</span><span class="m">1</span><span class="p">]]</span><span class="o">$</span><span class="n">resources</span><span class="p">[[</span><span class="m">1</span><span class="p">]]</span><span class="o">$</span><span class="n">point</span><span class="o">$</span><span class="n">coordinates</span><span class="p">)</span><span class="w">
+      </span><span class="n">res</span><span class="o">$</span><span class="n">coordinates</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">crds</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+    </span><span class="k">if</span><span class="p">(</span><span class="w"> </span><span class="s2">"zip"</span><span class="w"> </span><span class="o">%in%</span><span class="w"> </span><span class="n">returntype</span><span class="w"> </span><span class="p">)</span><span class="w">  </span><span class="p">{</span><span class="w">
+      </span><span class="n">res</span><span class="o">$</span><span class="n">zip</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">sub</span><span class="p">(</span><span class="w"> </span><span class="s2">"^.*(\\d{5}-?\\d?\\d?\\d?\\d?).*$"</span><span class="p">,</span><span class="w"> </span><span class="s2">"\\1"</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="o">$</span><span class="n">resourceSets</span><span class="p">[[</span><span class="m">1</span><span class="p">]]</span><span class="o">$</span><span class="n">resources</span><span class="p">[[</span><span class="m">1</span><span class="p">]]</span><span class="o">$</span><span class="n">address</span><span class="o">$</span><span class="n">formattedAddress</span><span class="w"> </span><span class="p">)</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+    </span><span class="nf">return</span><span class="p">(</span><span class="w"> </span><span class="n">res</span><span class="w"> </span><span class="p">)</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+  </span><span class="n">res</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">parse.json</span><span class="p">[[</span><span class="n">service</span><span class="p">]](</span><span class="n">j</span><span class="p">)</span><span class="w">
+  </span><span class="k">if</span><span class="p">(</span><span class="nf">length</span><span class="p">(</span><span class="n">returntype</span><span class="p">)</span><span class="o">==</span><span class="m">1</span><span class="p">)</span><span class="w"> </span><span class="n">res</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">res</span><span class="p">[[</span><span class="m">1</span><span class="p">]]</span><span class="w">
+  </span><span class="k">if</span><span class="p">(</span><span class="n">verbose</span><span class="p">)</span><span class="w"> </span><span class="n">message</span><span class="p">(</span><span class="s2">"\n"</span><span class="p">,</span><span class="n">appendLF</span><span class="o">=</span><span class="kc">FALSE</span><span class="p">)</span><span class="w">
+  </span><span class="nf">return</span><span class="p">(</span><span class="w"> </span><span class="n">res</span><span class="w"> </span><span class="p">)</span><span class="w">
+</span><span class="p">}</span><span class="w">
+
+</span><span class="c1">#Vectorize function
+</span><span class="n">geocodeVect</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">Vectorize</span><span class="p">(</span><span class="n">geocode</span><span class="p">,</span><span class="w"> </span><span class="n">vectorize.args</span><span class="o">=</span><span class="s2">"x"</span><span class="p">)</span></code></pre></figure>
+
+<div class="footnotes">
+  <ol>
+    <li id="fn:1">
+      <p>Rounded to nearest whole number. <a href="#fnref:1" class="reversefootnote">&#8617;</a></p>
+    </li>
+    <li id="fn:2">
+      <p>It must be noted that the US counties shapefile includes a number of cities as whole polygons, thus it’s really a mix of counties and cities (US Census Bureau release). <a href="#fnref:2" class="reversefootnote">&#8617;</a></p>
+    </li>
+  </ol>
+</div>
+
+  </article>
+
+</div>
+
+      </div>
+    </div>
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Where's the Data?</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col  footer-col-1">
+        <ul class="contact-list">
+          <li>Where's the Data?</li>
+          <li><a href="mailto:cmohamma@gmail.com">cmohamma@gmail.com</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col  footer-col-2">
+        <ul class="social-media-list">
+          
+          <li>
+            <a href="https://github.com/cmohamma">
+              <span class="icon  icon--github">
+                <svg viewBox="0 0 16 16">
+                  <path fill="#828282" d="M7.999,0.431c-4.285,0-7.76,3.474-7.76,7.761 c0,3.428,2.223,6.337,5.307,7.363c0.388,0.071,0.53-0.168,0.53-0.374c0-0.184-0.007-0.672-0.01-1.32 c-2.159,0.469-2.614-1.04-2.614-1.04c-0.353-0.896-0.862-1.135-0.862-1.135c-0.705-0.481,0.053-0.472,0.053-0.472 c0.779,0.055,1.189,0.8,1.189,0.8c0.692,1.186,1.816,0.843,2.258,0.645c0.071-0.502,0.271-0.843,0.493-1.037 C4.86,11.425,3.049,10.76,3.049,7.786c0-0.847,0.302-1.54,0.799-2.082C3.768,5.507,3.501,4.718,3.924,3.65 c0,0,0.652-0.209,2.134,0.796C6.677,4.273,7.34,4.187,8,4.184c0.659,0.003,1.323,0.089,1.943,0.261 c1.482-1.004,2.132-0.796,2.132-0.796c0.423,1.068,0.157,1.857,0.077,2.054c0.497,0.542,0.798,1.235,0.798,2.082 c0,2.981-1.814,3.637-3.543,3.829c0.279,0.24,0.527,0.713,0.527,1.437c0,1.037-0.01,1.874-0.01,2.129 c0,0.208,0.14,0.449,0.534,0.373c3.081-1.028,5.302-3.935,5.302-7.362C15.76,3.906,12.285,0.431,7.999,0.431z"/>
+                </svg>
+              </span>
+
+              <span class="username">cmohamma</span>
+            </a>
+          </li>
+          
+
+          
+        </ul>
+      </div>
+
+      <div class="footer-col  footer-col-3">
+        <p class="text">My musings on politics, pop culture, sports, and pretty much anything else I can find data on.
+</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+
+
+  </body>
+
+</html>
