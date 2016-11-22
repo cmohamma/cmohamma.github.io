@@ -1,9 +1,16 @@
 ---
+layout: post
 title: "Using Google Trends to track public sentiment on refugees"
+comments:  false
+published:  true
 author: "Cyrus Mohammadian"
-date: "April 15, 2016"
-output: html_document
+categories: [R]
+output:
+  md_document:
+  html_document:
+    fig_caption: yes
 ---
+
 
 The refugee crisis that is currently rocking the [Middle East](https://www.washingtonpost.com/news/monkey-cage/wp/2016/05/14/the-real-refugee-crisis-is-in-the-middle-east-not-europe/)
  and [Europe](http://www.bbc.com/news/world-europe-34131911) has renewed public as well as scholarly attention to the issue of forced migration. Just how bad is the current refugee crisis? The graph below shows a time series of forced migrants as a proportion of world population from 1960-2013 along side major political upheavals. The size of the dots are proportional to the number of forced migrants that event produced during the entirety of its duration. The global refugee crisis emerging from the Syrian civil war has proven to be the worst crises of forced migration since WWII. Nearly 10 million [Syrians](http://data.unhcr.org/syrianrefugees/regional.php) have fled their homes either to IDP camps in Syria or refugee camps across the Middle East and Europe.

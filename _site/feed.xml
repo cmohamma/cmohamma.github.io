@@ -6,8 +6,8 @@
 </description>
     <link>https://cmohamma.github.io/</link>
     <atom:link href="https://cmohamma.github.io/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Mon, 21 Nov 2016 19:51:12 -0800</pubDate>
-    <lastBuildDate>Mon, 21 Nov 2016 19:51:12 -0800</lastBuildDate>
+    <pubDate>Mon, 21 Nov 2016 19:58:33 -0800</pubDate>
+    <lastBuildDate>Mon, 21 Nov 2016 19:58:33 -0800</lastBuildDate>
     <generator>Jekyll v3.2.1</generator>
     
       <item>
@@ -2102,6 +2102,8 @@ FALSE It has 12 fields&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
         <link>https://cmohamma.github.io/2016/04/refugees.html</link>
         <guid isPermaLink="true">https://cmohamma.github.io/2016/04/refugees.html</guid>
         
+        
+        <category>R</category>
         
       </item>
     
